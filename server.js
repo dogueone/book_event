@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const graphqlHttp = require('express-graphql');
+const isAuth = require('./middleware/is-auth');
 
 const app = express();
 
@@ -12,6 +13,9 @@ connectDB();
 
 // Init Middleware to get the data in req.body
 app.use(express.json({ extended: false }));
+
+//Auth Middleware
+app.use(isAuth);
 
 app.use(
   '/graphql',

@@ -5,26 +5,11 @@ const { singleEvent, user } = require('./merge');
 
 // const { transformBooking, transformEvent } = require('./merge');
 
-/* const transformEvent = event => {
-  return {
-    ...event._doc,
-    date: dateToString(event._doc.date).toISOString(),
-    creator: user.bind(this, event.creator)
-  };
-}; */
-
-/* const transformBooking = booking => {
-  return {
-    ...booking._doc,
-    user: user.bind(this, booking._doc.user),
-    event: singleEvent.bind(this, booking._doc.event),
-    createdAt: dateToString(booking._doc.createdAt),
-    updatedAt: dateToString(booking._doc.updatedAt)
-  };
-}; */
-
 module.exports = {
-  bookings: async () => {
+  bookings: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated!');
+    }
     try {
       const bookings = await Booking.find();
       return bookings.map(booking => {
@@ -40,10 +25,13 @@ module.exports = {
       throw err;
     }
   },
-  bookEvent: async args => {
+  bookEvent: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated!');
+    }
     const fetchedEvent = await Event.findOne({ _id: args.eventId });
     const booking = new Booking({
-      user: '5dd296c5369e0935dc7a7dcc',
+      user: req.userId,
       event: fetchedEvent
     });
     const result = await booking.save();
@@ -55,7 +43,10 @@ module.exports = {
       updatedAt: dateToString(result._doc.updatedAt)
     };
   },
-  cancelBooking: async args => {
+  cancelBooking: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated!');
+    }
     try {
       const booking = await Booking.findById(args.bookingId).populate('event');
       const event = {
