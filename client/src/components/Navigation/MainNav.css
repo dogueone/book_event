@@ -4,15 +4,18 @@
     top:0;
     width:100%;
     height: 3.5rem;
-    background: #01d1d1;
+    background: #48a4aa;
     padding:0 1rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
 }
 
 .main-nav__logo h1 {
     margin: 0;
     font-size: 1.5rem;
+    color: #fff
 }
 
 .main-nav__items {
@@ -23,18 +26,31 @@
     padding: 0;
     list-style: none;
     margin: 0;
+    align-items: center;
 }
 .main-nav__items li{
     margin: 0 1rem;
 }
-.main-nav__items a{
-    text-decoration: none;
-    color: #333;
+
+.main-nav__items a,
+.main-nav__items button {
+  text-decoration: none;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0;
 }
+
 .main-nav__items a:hover,
 .main-nav__items a:active,
-.main-nav__items a.active{
-    color: #fff;
+.main-nav__items a.active,
+.main-nav__items button:hover,
+.main-nav__items button:active {
+  background: #fff;
+  color: #11757c; 
+  border-radius: 5px;
 }
-
-
