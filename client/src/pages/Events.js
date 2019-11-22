@@ -15,6 +15,10 @@ class EventsPage extends Component {
     selectedEvent: null
   };
 
+  /* if we unmount this component we not interested in response
+  if this component is active (componentDidMount) then after fetch, update the state, otherwise dont update */
+  isActive = true;
+
   constructor(props) {
     super(props);
     this.titleElRef = React.createRef();
@@ -140,11 +144,15 @@ class EventsPage extends Component {
       })
       .then(resData => {
         const events = resData.data.events;
-        this.setState({ events: events, isLoading: false });
+        if (this.isActive) {
+          this.setState({ events: events, isLoading: false });
+        }
       })
       .catch(err => {
         console.log(err);
-        this.setState({ isLoading: false });
+        if (this.isActive) {
+          this.setState({ isLoading: false });
+        }
       });
   }
 
@@ -155,7 +163,51 @@ class EventsPage extends Component {
     });
   };
 
-  bookEventHandler = () => {};
+  bookEventHandler = () => {
+    if (!this.context.token) {
+      this.setState({ selectedEvent: null });
+      return;
+    }
+    const requestBody = {
+      query: `
+      mutation {
+        bookEvent(eventId:"${this.state.selectedEvent._id}") {
+          _id
+          createdAt
+          updatedAt
+        }
+      }
+    `
+    };
+
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      //prettier-ignore
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.context.token
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error('Failed!');
+        }
+        return res.json();
+      })
+      .then(resData => {
+        console.log(resData);
+        this.setState({ selectedEvent: null });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  //after unmount component
+  componentWillUnmount() {
+    this.isActive = false;
+  }
 
   render() {
     return (
@@ -201,7 +253,7 @@ class EventsPage extends Component {
             canConfirm
             onCancel={this.modalCancelHandler}
             onConfirm={this.bookEventHandler}
-            confirmText='Book'
+            confirmText={this.context.token ? 'Book' : 'Confirm'}
           >
             <h1>{this.state.selectedEvent.title}</h1>
             <h2>
