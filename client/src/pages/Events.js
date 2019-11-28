@@ -15,7 +15,7 @@ class EventsPage extends Component {
     selectedEvent: null
   };
 
-  /* if we unmount this component we not interested in response
+  /* if we unmount this component we not interested in response.
   if this component is active (componentDidMount) then after fetch, update the state, otherwise dont update */
   isActive = true;
 
@@ -52,13 +52,13 @@ class EventsPage extends Component {
     ) {
       return;
     }
-    const event = { title: title, price, date, description };
+    const event = { title, price, date, description };
     console.log(event);
 
     const requestBody = {
       query: `
-        mutation {
-          createEvent (eventInput: {title: "${title}", description:"${description}", price:${price}, date:"${date}"}) {
+        mutation CreateEvent($title: String!, $desc: String!, $price: Float!, $date: String!) {
+          createEvent (eventInput: {title: $title, description: $desc, price: $price, date: $date}) {
             _id
             title
             description
@@ -66,7 +66,13 @@ class EventsPage extends Component {
             price
           }
         }
-      `
+      `,
+      variables: {
+        title: title,
+        desc: description,
+        price: price,
+        date: date
+      }
     };
     const token = this.context.token;
     // prettier-ignore
@@ -94,7 +100,7 @@ class EventsPage extends Component {
             date: resData.data.createEvent.date,
             price: resData.data.createEvent.price,
             creator: {
-              _id: this.context.userID
+              _id: this.context.userId
             }
           });
           return {events: updatedEvents}
@@ -170,14 +176,17 @@ class EventsPage extends Component {
     }
     const requestBody = {
       query: `
-      mutation {
-        bookEvent(eventId:"${this.state.selectedEvent._id}") {
+      mutation BookEvent ($id: ID!) {
+        bookEvent(eventId: $id) {
           _id
           createdAt
           updatedAt
         }
       }
-    `
+    `,
+      variables: {
+        id: this.state.selectedEvent._id
+      }
     };
 
     fetch('http://localhost:5000/graphql', {

@@ -1,9 +1,7 @@
 const Event = require('../../models/event');
-const { dateToString } = require('../../helpers/date');
-const { user } = require('./merge');
 const User = require('../../models/user');
 
-// const { transformEvent } = require('./merge');
+const { transformEvent } = require('./merge');
 
 module.exports = {
   events: async () => {
@@ -15,16 +13,12 @@ module.exports = {
                 ...event._doc,
                 _id: event.id,
                 creator: {
-                  ...event._doc.creator._doc,
+                  ...event._doc.creator._doc,s
                   _id: event._doc.creator.id
                 }
               }; */
 
-        return {
-          ...event._doc,
-          date: new Date(event._doc.date).toISOString(),
-          creator: user.bind(this, event._doc.creator)
-        };
+        return transformEvent(event);
       });
     } catch (err) {
       throw err;
@@ -49,11 +43,7 @@ module.exports = {
       //to leave out all metadata of the returned Event(_doc - property provided by mongoose)
       //transform _id to normal string that is understood by graphql; mongoose shortcut _id: event.id
       // { ...result._doc, _id: result._doc._id.toString() }
-      createdEvent = {
-        ...result._doc,
-        date: new Date(event._doc.date).toISOString(),
-        creator: user.bind(this, result._doc.creator)
-      };
+      createdEvent = transformEvent(result);
       const creator = await User.findById(req.userId);
       if (!creator) {
         throw new Error('User not found.');
